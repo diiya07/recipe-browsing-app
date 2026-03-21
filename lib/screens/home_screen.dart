@@ -101,41 +101,94 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (provider.recipes.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
-          child: const EmptyState(
-            title: 'No Recipes Found',
-            message: 'We could not find any recipes for this category.',
-            icon: Icons.search_off,
-          ),
-        ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: const EmptyState(
+                title: 'No Recipes Found',
+                message: 'We could not find any recipes for this category.',
+                icon: Icons.search_off,
+              ),
+            ),
+          );
+        }
       );
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: provider.recipes.length + (provider.isFetchingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == provider.recipes.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 600;
+
+        if (isWide) {
+          int crossAxisCount = constraints.maxWidth > 900 ? 3 : 2;
+          
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    mainAxisExtent: 390, // Fixed height for recipe cards
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final recipe = provider.recipes[index];
+                      return RecipeCard(
+                        recipe: recipe,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
+                          );
+                        },
+                      );
+                    },
+                    childCount: provider.recipes.length,
+                  ),
+                ),
+              ),
+              if (provider.isFetchingMore)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
+          );
+        } else {
+          return ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: provider.recipes.length + (provider.isFetchingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == provider.recipes.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final recipe = provider.recipes[index];
+              return RecipeCard(
+                recipe: recipe,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
+                  );
+                },
+              );
+            },
           );
         }
-
-        final recipe = provider.recipes[index];
-        return RecipeCard(
-          recipe: recipe,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
-            );
-          },
-        );
       },
     );
   }
