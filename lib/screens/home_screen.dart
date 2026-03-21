@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/recipe_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/filter_chips.dart';
@@ -10,7 +11,7 @@ import 'recipe_detail_screen.dart';
 import 'shopping_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -39,10 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipes'),
         actions: [
+          IconButton(
+            icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              themeProvider.toggleTheme();
+            },
+            tooltip: 'Toggle Theme',
+          ),
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
             onPressed: () {
