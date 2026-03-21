@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import '../models/recipe.dart';
 import '../providers/shopping_list_provider.dart';
 import '../utils/constants.dart';
@@ -30,7 +31,14 @@ class RecipeDetailScreen extends StatelessWidget {
                     child: CachedNetworkImage(
                       imageUrl: recipe.image,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey[200]),
+                      placeholder: (context, url) {
+                        final isDark = Theme.of(context).brightness == Brightness.dark;
+                        return Shimmer.fromColors(
+                          baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+                          highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+                          child: Container(color: Colors.white),
+                        );
+                      },
                       errorWidget: (context, url, err) => Container(
                         color: Colors.grey[200],
                         child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),

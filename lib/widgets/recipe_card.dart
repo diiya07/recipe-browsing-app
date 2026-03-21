@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import '../models/recipe.dart';
 import '../utils/constants.dart';
 
@@ -39,11 +40,17 @@ class RecipeCard extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 200,
-                  color: Colors.grey[200],
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
+                placeholder: (context, url) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Shimmer.fromColors(
+                    baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+                    highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+                    child: Container(
+                      height: 200,
+                      color: Colors.white,
+                    ),
+                  );
+                },
                 errorWidget: (context, url, error) => Container(
                   height: 200,
                   color: Colors.grey[200],
